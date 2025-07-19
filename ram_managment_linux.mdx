@@ -1,0 +1,161 @@
+---
+title: "Clean Up Your RAM & Swap on Pop!_OS: A How to guide"
+summary: "Learn how to clear RAM caches and manage swap space on Ubuntu/Pop!_OS to improve system performance."
+image: "/ram-management-linux.png"
+publishedAt: "2024-09-22"
+---
+
+# Clean Up Your RAM & Swap on Ubuntu/Pop!_OS: A Step-by-Step Guide
+
+If you’re finding your Ubuntu or Pop!_OS system dragging, sometimes clearing out RAM caches and swap can give you a little boost. In this guide, we’ll walk through both command-line and GUI methods to free up memory and swap space. Let’s break it down in plain terms.
+
+---
+
+## Command-Line Methods
+
+### 1. Clear RAM Cache (Drop Caches)
+
+Linux automatically caches data in RAM to speed things up. If you really need to clear it (not usually necessary), use this command:
+
+```bash
+sudo sh -c "sync; echo 3 > /proc/sys/vm/drop_caches"
+```
+
+**What it does:**  
+- `sync`: Flushes file system buffers.  
+- `echo 3 > /proc/sys/vm/drop_caches`: Clears page cache, dentries, and inodes.
+
+*Use it with caution—Linux is pretty good at managing memory on its own.*
+
+---
+
+### 2. Clear Swap Memory 
+
+If your system is swapping too much, you can reset it by turning swap off and then back on:
+
+```bash
+sudo swapoff -a && sudo swapon -a
+```
+-
+
+**Explanation:**  
+- `swapoff -a`: Disables all swap devices.  
+- `swapon -a`: Re-enables them, clearing the swap in the process.
+- Turning swap back-On is not guaranteed.
+- A simple restart will fix the swap off issue.
+
+---
+
+### 3. Adjust Swappiness to Reduce Swap Usage
+
+By default, Linux starts swapping at a swappiness value of 60. Lowering it means your system will prefer using RAM. For example, to set it to 10:
+
+```bash
+sudo sysctl vm.swappiness=10
+```
+
+To make this permanent:
+
+```bash
+echo "vm.swappiness=10" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+---
+
+### 4. Kill High-Memory Processes
+
+Sometimes, the simplest fix is to kill a process that’s hogging memory. Use:
+
+```bash
+top
+```
+
+Press `M` to sort by memory usage, note the PID, and then kill it:
+
+```bash
+sudo kill -9 PID
+```
+
+Or, for a friendlier interface, install and use `htop`:
+
+```bash
+sudo apt install htop -y
+htop
+```
+
+Navigate with your arrow keys and hit `F9` to kill the misbehaving process.
+
+---
+
+## GUI Methods
+
+If you’re not a fan of the terminal, these GUI apps can help you manage memory and swap easily.
+
+### 1. Stacer
+
+Stacer is a system optimizer that lets you clean your memory with just one click.
+
+**Installation:**
+
+```bash
+sudo apt install stacer -y
+```
+
+**Usage:**  
+Open Stacer, go to the “System Cleaner” section, then select “Memory” to clear caches.
+
+---
+
+### 2. BleachBit
+
+BleachBit isn’t just for cleaning up disk space—it can also free up memory.
+
+**Installation:**
+
+```bash
+sudo apt install bleachbit -y
+```
+
+**Usage:**  
+Launch BleachBit and use the “Free Memory” option to clear RAM.
+
+---
+
+### 3. Gnome System Monitor
+
+This tool shows you real-time resource usage and lets you kill any process directly.
+
+**Installation (if needed):**
+
+```bash
+sudo apt install gnome-system-monitor -y
+```
+
+**Usage:**  
+Open Gnome System Monitor, check the Processes tab, and end any heavy processes.
+
+---
+
+### 4. LXTask
+
+For a lighter option, LXTask provides a simple overview of running processes and memory usage.
+
+**Installation:**
+
+```bash
+sudo apt install lxtask -y
+```
+
+**Usage:**  
+Launch LXTask to spot and stop memory-heavy apps.
+
+---
+
+## Final Thoughts
+
+There isn’t a one-size-fits-all fix. If you like quick command-line solutions, try clearing caches and adjusting swappiness. If you prefer a visual approach, tools like Stacer and BleachBit offer a straightforward way to keep your system lean.
+
+Keeping your system in check is a continuous process—choose the method that fits your workflow best, and remember that sometimes Linux just needs a little nudge.
+
+Hope this helps, boss! Let me know if you need any more tweaks or details.

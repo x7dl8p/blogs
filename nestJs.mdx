@@ -1,0 +1,68 @@
+---
+title: "NestJS: The Good, The Bad, and The Ugly"
+summary: "A battle-scarred review of NestJS after years in the trenches of production code."
+image: "/nest-blog.png"
+publishedAt: "2024-09-05"
+---  
+
+## Would You Use NestJS for Your Next Project?  
+
+I've built a bunch of apps with NestJS—some used by hundreds, others by millions—across startups, growing companies, and big corporations. From modular monoliths to event-driven microservices, I've worked with GraphQL, REST, and everything in between.  
+
+NestJS has some great things going for it, but it's not perfect. Here’s what I’ve learned—both the good and the frustrating parts.  
+
+---
+
+## The Good  
+
+### **Clear Structure & Consistency**  
+NestJS enforces a structured way of doing things, making it easier to work across teams. Since it's opinionated, developers don’t have to reinvent the wheel every time.  
+
+For example, if you've worked on a NestJS GraphQL project, jumping into another one is pretty straightforward—no deep dives into architecture needed. The documentation is solid, making it easy for new devs to get up to speed quickly.  
+
+### **Quick Onboarding**  
+NestJS reduces the "where do I even start?" problem for new developers. With its well-defined patterns, even junior devs can start contributing right away. That means less time spent explaining basics and more time actually building stuff.  
+
+---
+
+## The Bad  
+
+### **Circular Dependencies**  
+Every NestJS project eventually runs into circular dependency issues. They can slow down development if not caught early. Tools like **Madge** help identify them before they become a major headache.  
+
+### **Errors Ambiguity**
+Often, errors occur without providing much explanation, making them difficult to trace. Over time, however, one can learn to identify them through experience.
+
+### **Silent Errors on Startup**  
+Errors sometimes get swallowed when the app starts, making debugging harder than it should be. A simple fix is to manually log errors before the app exits:  
+
+```typescript
+async function bootstrap() {
+  try {
+    await app.listen(3000);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+}
+```  
+
+---
+
+## The Ugly  
+
+### **None**  
+
+I do not beleive that there is any.
+
+---
+
+## Conclusion  
+
+NestJS is a solid framework—structured, well-documented, and great for teams. But it’s not perfect, for The perfection belongs to the GOD.  
+
+Would I use it again?  
+
+Absolutly, because the only backend frame that I am very fimiliar with. :)
+
+- Mohammad
