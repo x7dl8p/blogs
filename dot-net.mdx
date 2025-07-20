@@ -1,0 +1,103 @@
+---
+title: "Getting Started with .NET: From Console Apps to Full Stack"
+summary: "An overview of the .NET platform for developers—covering the core components, supported app types, and a minimal console-based To-Do app in C#."
+image: "https://raw.githubusercontent.com/x7dl8p/blogs/refs/heads/main/images/ASPX-blog.png"
+publishedAt: "2025-07-05"
+---
+
+.NET is a cross-platform development framework created by Microsoft. It supports building applications across desktop, web, mobile, gaming, IoT, and cloud platforms. This post outlines how .NET is structured, what you can build with it, and how to get started by writing a simple console app using C#.
+
+## What is .NET?
+
+.NET is an open-source platform that supports multiple programming languages, most commonly C#. It runs on Windows, Linux, and macOS and consists of the SDK for development and a runtime that handles app execution, memory management, and compilation.
+
+## Core Components
+
+- **.NET SDK**: Includes compilers, templates, and CLI tools to build and run apps.
+- **.NET Runtime**: Hosts and executes .NET apps, including the CLR and JIT compiler.
+- **ASP.NET Core**: Framework for creating APIs and web applications.
+- **Entity Framework Core**: ORM that allows working with databases using C#.
+- **Blazor**: Enables C# to be used for client-side web UIs.
+- **.NET MAUI / Xamarin**: For cross-platform mobile and desktop app development.
+
+## What You Can Build
+
+* Web App: ASP.NET Core, Razor, Blazor
+* APIs: ASP.NET Core Web API
+* Desktop App: WinForms, WPF, .NET MAUI
+* Mobile App: .NET MAUI
+* Games: Unity with C#
+* IoT/Cloud: .NET IoT, Azure, gRPC
+
+## Basic Example: Console To-Do App in C#
+
+```csharp
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static List<string> todos = new List<string>();
+
+    static void Main()
+    {
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("📝 Your To-Do List:");
+            for (int i = 0; i < todos.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {todos[i]}");
+            }
+
+            Console.WriteLine("\nAdd a task (or type 'exit'):");
+            var input = Console.ReadLine();
+
+            if (input.ToLower() == "exit") break;
+            if (!string.IsNullOrWhiteSpace(input)) todos.Add(input);
+        }
+    }
+}
+````
+
+### How to Run This
+
+```bash
+dotnet new console -n TodoApp
+cd TodoApp
+# Paste the code into Program.cs
+dotnet run
+```
+
+## Why C#?
+
+C# was developed by Microsoft for .NET. It is statically typed, supports modern features like async/await, and is designed to work across the .NET ecosystem. Most libraries and tools in .NET are tailored for C#.
+
+## Comparison Snapshot
+
+* **C# (.NET)**: Performance: Fast, Typing: Static, UI Frameworks: MAUI, WPF, Mobile Support: Yes
+* **Java**: Performance: Fast, Typing: Static, UI Frameworks: JavaFX, Mobile Support: Limited
+* **Node.js**: Performance: Medium, Typing: Dynamic, UI Frameworks: Web-only, Mobile Support: No
+* **Python**: Performance: Slow, Typing: Dynamic, UI Frameworks: Minimal, Mobile Support: No
+
+## Drawbacks
+
+* Visual Studio can be resource-intensive
+* MAUI is under active development and not fully mature
+* Legacy .NET Framework apps can be heavy on memory
+* Deep integration with Azure can lead to vendor lock-in
+
+## Use Cases
+
+* APIs and backend services
+* Desktop utilities and internal tools
+* Enterprise-grade web applications
+* Cross-platform mobile apps
+* Game development with Unity
+* IoT and real-time data apps
+
+---
+
+This post covered the basics of the .NET ecosystem and walked through a minimal C# app. The console To-Do app shown here can be extended into web, GUI, or mobile forms using ASP.NET, WPF, or MAUI depending on the requirements.
+
+– Mohammad
