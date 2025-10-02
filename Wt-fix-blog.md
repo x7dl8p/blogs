@@ -1,8 +1,8 @@
 ---
-title: "Getting Started with .NET: From Console Apps to Full Stack"
-summary: "An overview of the .NET platform for developers—covering the core components, supported app types, and a minimal console-based To-Do app in C#."
+title: "How I Fixed the wt Command for Windows Terminal: A Personal Walkthrough"
+summary: "Recently,  I ran into an issue: the wt command didn’t work from PowerShell or Command Prompt,  even though it was installed, Here’s the story of how I traced the problem, an..."
 image: "https://github.com/x7dl8p/blogs/blob/main/images/Screenshot%202025-10-02%20131326.png"
-publishedAt: "2025-07-05"
+publishedAt: "2025-10-02"
 ---
 
 # How I Fixed the `wt` Command for Windows Terminal: A Personal Walkthrough
@@ -10,16 +10,18 @@ publishedAt: "2025-07-05"
 I installed Windows Terminal and expected the `wt` command to work system-wide. It did not. This is the step-by-step account of what I received, how I reasoned about the problem, and how I solved it.
 
 ## What I received
+
 These are the key outputs and messages I saw as I debugged the problem.
 
 1. Confirmed installation location:
+
 ```text
 PS C:\Users\Admin> Get-AppxPackage *WindowsTerminal* | Select InstallLocation
 
 InstallLocation
 ---------------
 C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.23.12681.0_x64__8wekyb3d8bbwe
-````
+```
 
 2. `wt` not recognized when called directly:
 
@@ -29,14 +31,14 @@ wt : The term 'wt' is not recognized as the name of a cmdlet, function, script f
 ...
 ```
 
-3. Direct launch of the executable worked:
+3. find where located, then Direct launch of the executable worked:
 
 ```powershell
 & "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.23.12681.0_x64__8wekyb3d8bbwe\wt.exe"
 # Windows Terminal opened
 ```
 
-4. Attempt to add WindowsApps to PATH with `setx` produced truncation warning:
+4. Attempt to add WindowsApps to PATH with `setx` produced truncation warning and did not solve the problem:
 
 ```text
 WARNING: The data being saved is truncated to 1024 characters.
@@ -44,7 +46,7 @@ WARNING: The data being saved is truncated to 1024 characters.
 SUCCESS: Specified value was saved.
 ```
 
-5. After the safe fix, the command worked:
+5. After using the safe .NET method to update the PATH, the command worked:
 
 ```powershell
 PS C:\Users\Admin> wt -d $PWD
@@ -80,7 +82,7 @@ Get-AppxPackage *WindowsTerminal* | Select InstallLocation
 $env:PATH -split ';'
 ```
 
-#### (Bad attempt) setx — shows truncation risk
+#### (Bad attempt) setx — shows truncation risk and does not solve the problem
 
 ```powershell
 setx PATH "$($env:PATH);$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps"
