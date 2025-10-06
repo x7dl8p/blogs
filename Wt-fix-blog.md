@@ -1,7 +1,7 @@
 ---
 title: "How I Fixed the wt Command for Windows Terminal: A Personal Walkthrough"
 summary: "Recently,  I ran into an issue: the wt command didn’t work from PowerShell or Command Prompt,  even though it was installed, Here’s the story of how I traced the problem, an..."
-image: "https://github.com/x7dl8p/blogs/blob/main/images/Screenshot%202025-10-02%20131326.png"
+image: "[https://github.com/x7dl8p/blogs/blob/main/images/Screenshot%202025-10-02%20131326.png](https://raw.githubusercontent.com/x7dl8p/blogs/refs/heads/main/images/Screenshot%202025-10-02%20131326.png)"
 publishedAt: "2025-10-02"
 ---
 
@@ -118,3 +118,4 @@ After updating the PATH using the .NET API, `wt` resolved correctly and opened W
 * If you installed from an MSIX bundle, the binary will live under `C:\Program Files\WindowsApps\…`.
 
 --Mohammad
+
