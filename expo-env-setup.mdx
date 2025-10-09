@@ -1,0 +1,293 @@
+---
+title: "A How-To Guide on Setting Up an Expo Development Environment Fully Without Android Studio"
+summary: "Expo’s own devs recommends using a local development environment and not Expo Go,for production-quality testing and builds. This guide walks you through setting up a complete Expo Android development workflow on Linux using only command-line tools."
+image: "https://raw.githubusercontent.com/x7dl8p/blogs/refs/heads/main/images/expo-dev-env-setup.jpeg"
+publishedAt: "2025-10-02"
+---
+
+# Setting Up a Working Expo Android Build (Without Android Studio)
+
+This guide walks you through the complete journey of getting an Expo React Native app to build and run on an Android device, without ever installing Android Studio. It’s based on a real-world troubleshooting log from a clean Linux system and explains not just what to do, but why each step matters.
+
+---
+
+## Why This Guide Exists
+
+Expo’s `npx expo run:android` command promises a smooth developer experience, but only if your environment is correctly configured. On Linux, that often means manually installing and wiring together the Android SDK, Java, and ADB. Android Studio bundles all of this automatically, but if you prefer a leaner setup (or are working on a headless server), this guide shows you how to do it entirely from the command line.
+
+We’ll go step by step through the actual errors encountered, the reasoning behind each fix, and how to avoid common pitfalls.
+
+---
+
+## Step 1: Install and Verify ADB
+
+**What is ADB?**  
+Android Debug Bridge (`adb`) is the command-line tool that lets your computer communicate with an Android device over USB or Wi-Fi. Expo uses it to install and launch your app.
+
+### Check if ADB is installed
+```bash
+which adb || command -v adb
+```
+If you see `adb not found`, it’s not installed.
+
+### Install ADB via APT
+Since we’re on Linux (Ubuntu/Debian family), we use `apt`:
+```bash
+sudo apt update && sudo apt install -y adb
+```
+
+Why `sudo`? Installing system packages requires elevated privileges.
+
+### Verify device connection
+Plug in your Android device with **USB debugging enabled** (found in Developer Options), then run:
+```bash
+adb devices
+```
+
+You’ll likely see:
+```
+List of devices attached
+pfcaivx8usm7orr4    unauthorized
+```
+
+This means your device is connected but hasn’t trusted your computer yet. Unlock your phone and tap “Allow” on the popup. Then run `adb devices` again:
+```
+List of devices attached
+pfcaivx8usm7orr4    device
+```
+
+Success! Your device is now ready for development.
+
+---
+
+## Step 2: Install the Expo CLI Package
+
+When you run `npx expo run:android` in a project that doesn’t have `expo` installed locally, you’ll get:
+```
+ConfigError: Cannot determine the project's Expo SDK version because the module `expo` is not installed.
+```
+
+This happens because `npx` can run global binaries, but the Expo build system needs the actual `expo` package in your `node_modules`.
+
+### Fix it by installing Expo
+```bash
+npm install expo
+```
+
+Note: You may see deprecation warnings, these are common in the React Native ecosystem and usually safe to ignore for now.
+
+Once installed, you’re ready for the next step, but you’ll quickly hit another wall.
+
+---
+
+## Step 3: Install Java (OpenJDK)
+
+Expo’s Android build process relies on Gradle, which requires Java. If Java isn’t installed, you’ll see:
+```
+ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+```
+
+### Install OpenJDK 17
+Android build tools officially support JDK 17, so we install that:
+```bash
+sudo apt install -y openjdk-17-jdk
+```
+
+Verify it worked:
+```bash
+java -version
+```
+You should see something like:
+```
+openjdk version "17.0.16" 2025-07-15
+```
+
+Java is now ready.
+
+---
+
+## Step 4: Set Up the Android SDK (Without Android Studio)
+
+This is the trickiest part. Expo expects the Android SDK to be in a specific location with specific tools installed. Android Studio normally handles this, but we’ll do it manually.
+why ?, because they did not sponser me ;)
+
+### Download the Command-Line Tools
+Google provides a minimal SDK package that includes `sdkmanager`, the tool used to install the rest of the SDK.
+
+```bash
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O ~/Downloads/commandlinetools-linux.zip
+```
+
+Pro tip: Always get the latest link from Android Studio’s command-line tools page.
+Link : https://developer.android.com/tools/releases/cmdline-tools#android_sdk_command-line_tools_50_canary
+
+### Install to a system-wide location
+We’ll place the SDK in `/usr/lib/android-sdk`, a clean and conventional path:
+```bash
+sudo mkdir -p /usr/lib/android-sdk/cmdline-tools
+sudo unzip ~/Downloads/commandlinetools-linux.zip -d /usr/lib/android-sdk/cmdline-tools/latest
+```
+
+### Fix the directory structure
+The ZIP file contains a nested `cmdline-tools` folder, which breaks the expected layout. We need:
+```
+/usr/lib/android-sdk/cmdline-tools/latest/bin/sdkmanager
+```
+But we currently have (can be diffrent for you):
+```
+/usr/lib/android-sdk/cmdline-tools/latest/cmdline-tools/bin/sdkmanager
+```
+
+So we move the inner contents up one level:
+```bash
+sudo mv /usr/lib/android-sdk/cmdline-tools/latest/cmdline-tools/* /usr/lib/android-sdk/cmdline-tools/latest/
+sudo rmdir /usr/lib/android-sdk/cmdline-tools/latest/cmdline-tools
+```
+
+### Set environment variables
+Add these lines to your shell config (`~/.zshrc` or `~/.bashrc`):
+```bash
+export ANDROID_SDK_ROOT=/usr/lib/android-sdk
+export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+```
+
+Then reload your shell (close all - you can restart the device):
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+### Verify `sdkmanager`
+```bash
+sdkmanager --version
+```
+Output: `12.0` → Working!
+
+---
+
+## Step 5: Install Android Build Components
+
+Now we use `sdkmanager` to install the required SDK packages:
+```bash
+sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+```
+
+But here’s the catch: If you run this as a regular user and the SDK is in a `sudo`-owned directory, permissions will block the install, especially for `build-tools`.
+
+In our logs, `platform-tools` (which includes `adb`) installed fine, but `build-tools` silently failed.
+
+### Workaround: Manual copy (when auto-install fails)
+Sometimes, the build process extracts tools to a temporary folder (like `/home/x7dl8p/Android/sdk/build-tools`). If that happens, you can manually move them to the correct SDK location:
+
+```bash
+sudo mkdir -p /usr/lib/android-sdk/build-tools/34.0.0
+sudo cp -r /home/x7dl8p/Android/sdk/build-tools/* /usr/lib/android-sdk/build-tools/34.0.0/
+```
+
+How do you know it worked?  
+Run:  
+```bash
+ls /usr/lib/android-sdk/build-tools/34.0.0
+```  
+You should see `aapt`, `zipalign`, `apksigner`, etc.
+
+---
+
+## Step 6: Accept Licenses and Fix Permissions
+
+Even with all tools in place, the build may still fail with:
+```
+License for package NDK (Side by side) 27.1.12297006 not accepted.
+```
+
+And:
+```
+Exception while marshalling ... package.xml. Probably the SDK is read-only
+```
+
+These are two separate but related issues:
+
+### 1. Accept all SDK licenses
+Use the full path to `sdkmanager` (since `sudo` doesn’t inherit your `PATH`):
+```bash
+sudo /usr/lib/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=/usr/lib/android-sdk
+```
+When prompted, type `y` and press Enter for each license.
+
+### 2. Fix SDK directory ownership
+The SDK was created with `sudo`, so your user can’t write to it. Fix that:
+```bash
+sudo chown -R $USER:$USER /usr/lib/android-sdk
+```
+
+Now your user owns the entire SDK directory, and Gradle can read/write as needed.
+
+---
+
+## Step 7: Run the Build!
+
+Finally, run:
+```bash
+npx expo run:android
+```
+
+If everything is set up correctly, you’ll see:
+```
+› Building app...
+...
+build succesfully,
+```
+
+Your app will install and launch on your connected Android device.
+
+You did it, no Android Studio required!
+
+---
+
+## Pro Tips for Future Setups
+
+To avoid repeating this process, here’s a streamlined script you can use on a fresh machine (after installing Node.js and Java):
+
+```bash
+# 1. Install ADB
+sudo apt update && sudo apt install -y adb
+
+# 2. Set up Android SDK
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/clt.zip
+sudo mkdir -p /usr/lib/android-sdk/cmdline-tools
+sudo unzip /tmp/clt.zip -d /usr/lib/android-sdk/cmdline-tools/latest
+sudo mv /usr/lib/android-sdk/cmdline-tools/latest/cmdline-tools/* /usr/lib/android-sdk/cmdline-tools/latest/
+sudo rmdir /usr/lib/android-sdk/cmdline-tools/latest/cmdline-tools
+
+# 3. Set env vars
+echo 'export ANDROID_SDK_ROOT=/usr/lib/android-sdk' >> ~/.zshrc
+echo 'export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools' >> ~/.zshrc
+source ~/.zshrc
+
+# 4. Fix ownership
+sudo chown -R $USER:$USER /usr/lib/android-sdk
+
+# 5. Install SDK components
+sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+# 6. Accept licenses
+sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT
+
+# 7. In your Expo project
+npm install expo
+npx expo run:android
+```
+
+---
+
+## Final Thoughts
+
+Setting up Android development on Linux without Android Studio is absolutely possible, but it requires understanding how the pieces fit together:  
+- ADB talks to your device  
+- Java powers Gradle  
+- SDK tools compile your app  
+- Licenses and permissions are silent gatekeepers
+
+By following this guide, you not only fix your current issue, you gain deeper insight into the Android build pipeline, making you a more resilient developer.
+
+-- mohammad
