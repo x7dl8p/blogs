@@ -1,7 +1,7 @@
 ---
-title: 'When a Big Chunk of the Internet Went Dark'
+title: 'When a Big Chunk of the Internet Went Dark, Clouflare Outage Story'
 summary: 'Cloudflare didn’t just slow down, core internal systems crashed outright. What we re witnessing is not something new for this year; we need to understand something bigger.'
-image: 'https://cf-assets.www.cloudflare.com/zkvhlag99gkb/9f2k63fiixI2YXDgsnbGq/3c377a6fbd84b5347f814deb6435c476/Cloudflare-Outage-hero-18-nov-2025.png'
+image: 'https://raw.githubusercontent.com/x7dl8p/blogs/refs/heads/main/images/Cloudflare-Outage-hero-18-nov-2025.png'
 publishedAt: '2025-11-19'
 ---
 
@@ -13,13 +13,13 @@ But here’s the thing: no one got hacked. No DDoS won. just a size problem.
 
 It was just one config file. A little too big. Pushed a little too fast. And because of how Cloudflare’s network is built, that one file took down *thousands* of machines , one by one, across 330 cities , like dominos wired to the same timer.
 
-Let me walk you through it, the way I pieced it together while waiting for my npm pakage to load during build in PRODUCTION.
+Let me walk you through it, the way how I pieced it together while waiting for my npm pakage to load during build in PRODUCTION :(
 
 ---
 
 ## First, What Even Is Cloudflare Under the Hood
 
-Most people think of Cloudflare as a CDN or a firewall. Fair. But technically, every HTTP request hits this pipeline:
+Most people think of Cloudflare as a CDN or a firewall. Fair. But technically its hosting + DB + VPN + Security, but all these HTTP request hits this pipeline:
 
 1. TLS termination (hello, SNI routing),
 2. Then into **FL**, short for *Frontline* , their ultra-low-latency proxy layer,
@@ -87,7 +87,11 @@ I have a Old pc at home using Cloudflare Tunnel to expose my lab. I built my fin
 
 When the outage hit, I didn’t rage. I opened `dig +short <my-domain>` and saw it still resolved. So I knew: DNS was up, TLS handshake worked , it was deeper. FL.
 
-And when the blog dropped an hour later? I read it like a textbook. Not to judge, but to learn.
+And when the blog dropped an hour later? I read it like a University Results, and the apology by Matthew Prince, just broke me.
+
+> We are sorry for the impact to our customers and to the Internet in general. Given Cloudflare's importance in the Internet ecosystem any outage of any of our systems is unacceptable. That there was a period of time where our network was not able to route traffic is deeply painful to every member of our team. We know we let you down today. - Matthew Prince
+
+[Offcial report](https://blog.cloudflare.com/18-november-2025-outage/?utm_source=mohammad.is-a.dev)
 
 Because here’s the truth: any system this fast, this distributed, this *ambitious* will eventually meet a corner case no test caught.
 
@@ -96,7 +100,6 @@ What matters is: do they own it? Do they explain it? Do they fix it *and* share 
 Cloudflare did all three.
 
 So yeah, the Internet blinked. But it didn’t break.
-And I’m still shipping to `*.workers.dev` tonight.
-one last thing the image is coming from their servers so if it didnt load, you know what to understand :)
+And I’m still shipping to "*.workers.dev" tonight.
 
 -- mohammad
